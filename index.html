@@ -1,1 +1,236 @@
-lol
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Discord Webhook Control Panel</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #1e1e2f, #2f2f3f);
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: auto;
+      padding: 20px;
+    }
+
+    .panel {
+      background: #232336;
+      border-radius: 15px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
+      padding: 30px;
+      width: 100%;
+      max-width: 480px;
+      animation: slideIn 1s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(-50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    h2 {
+      text-align: center;
+      color: #00acee;
+      margin-bottom: 20px;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      background: #2f2f47;
+      color: white;
+    }
+
+    textarea {
+      resize: vertical;
+      height: 60px;
+    }
+
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+    }
+
+    button {
+      flex: 1 1 calc(50% - 10px);
+      background: #3a3a55;
+      border: none;
+      color: #fff;
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    button:hover {
+      background: #505070;
+      transform: scale(1.05);
+    }
+
+    .webhook-info {
+      font-size: 12px;
+      margin-top: 10px;
+      text-align: center;
+      color: #bbb;
+    }
+
+    .status {
+      margin-top: 10px;
+      font-size: 13px;
+      text-align: center;
+      color: #4af;
+    }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <h2>Discord Webhook Panel</h2>
+    <input type="text" id="webhookURL" placeholder="Webhook URL" />
+    <input type="text" id="webhookName" placeholder="Custom Name (optional)" />
+    <input type="text" id="avatarURL" placeholder="Avatar URL (optional)" />
+    <textarea id="messageContent" placeholder="Message Content"></textarea>
+    <div class="button-group">
+      <button onclick="sendMessage()">Send</button>
+      <button onclick="startSpam()">Start Spam</button>
+      <button onclick="stopSpam()">Stop Spam</button>
+      <button onclick="editWebhook()">Edit</button>
+      <button onclick="deleteWebhook()">Delete</button>
+      <button onclick="getWebhookInfo()">Show Info</button>
+    </div>
+    <div class="webhook-info" id="webhookDisplay">Webhook info will show here.</div>
+    <div class="status" id="status"></div>
+  </div>
+
+  <script>
+    const statusEl = document.getElementById("status");
+    const webhookDisplay = document.getElementById("webhookDisplay");
+    let spamInterval;
+
+    function showStatus(text, color = "#4af") {
+      statusEl.style.color = color;
+      statusEl.textContent = text;
+    }
+
+    function getValues() {
+      return {
+        url: document.getElementById("webhookURL").value.trim(),
+        name: document.getElementById("webhookName").value.trim(),
+        avatar: document.getElementById("avatarURL").value.trim(),
+        content: document.getElementById("messageContent").value.trim(),
+      };
+    }
+
+    async function sendMessage() {
+      const { url, name, avatar, content } = getValues();
+      if (!url || !content) return showStatus("Webhook URL & message required.", "orange");
+
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            content,
+            username: name || undefined,
+            avatar_url: avatar || undefined,
+          }),
+        });
+        showStatus(res.ok ? "Message sent!" : "Failed to send.");
+      } catch {
+        showStatus("Error sending message.", "red");
+      }
+    }
+
+    function startSpam() {
+      const { url, name, avatar, content } = getValues();
+      if (!url || !content) return showStatus("Webhook URL & message required.", "orange");
+      if (spamInterval) return showStatus("Spam is already running!", "#ff0");
+
+      showStatus("Spamming started!", "#0f0");
+      spamInterval = setInterval(() => {
+        fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            content,
+            username: name || undefined,
+            avatar_url: avatar || undefined,
+          }),
+        });
+      }, 700); // Adjust delay as needed
+    }
+
+    function stopSpam() {
+      if (spamInterval) {
+        clearInterval(spamInterval);
+        spamInterval = null;
+        showStatus("Spamming stopped.");
+      } else {
+        showStatus("Spam wasn't running.", "orange");
+      }
+    }
+
+    async function editWebhook() {
+      const { url, name, avatar } = getValues();
+      if (!url || (!name && !avatar)) return showStatus("Nothing to change.", "orange");
+
+      try {
+        const res = await fetch(url, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: name || undefined,
+            avatar: avatar || undefined,
+          }),
+        });
+        showStatus(res.ok ? "Webhook updated!" : "Failed to update.");
+      } catch {
+        showStatus("Error editing webhook.", "red");
+      }
+    }
+
+    async function deleteWebhook() {
+      const { url } = getValues();
+      if (!url) return showStatus("Webhook URL required.", "orange");
+
+      try {
+        const res = await fetch(url, { method: "DELETE" });
+        showStatus(res.ok ? "Webhook deleted!" : "Failed to delete.", res.ok ? "#4af" : "red");
+      } catch {
+        showStatus("Error deleting webhook.", "red");
+      }
+    }
+
+    async function getWebhookInfo() {
+      const { url } = getValues();
+      if (!url) return showStatus("Webhook URL required.", "orange");
+
+      try {
+        const res = await fetch(url);
+        if (!res.ok) return showStatus("Couldn't fetch webhook.", "red");
+
+        const data = await res.json();
+        webhookDisplay.innerHTML = `
+          Name: <b>${data.name}</b><br>
+          ID: ${data.id}<br>
+          Channel ID: ${data.channel_id}<br>
+          Avatar: <img src="https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png" height="30">
+        `;
+        showStatus("Webhook info loaded.");
+      } catch {
+        showStatus("Error fetching webhook info.", "red");
+      }
+    }
+  </script>
+</body>
+</html>
