@@ -1,73 +1,74 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>BingBux Lite</title>
+  <title>BingBux Ultra</title>
   <style>
     body {
       background-color: #0d1117;
       color: #c9d1d9;
       font-family: 'Courier New', monospace;
-      padding: 20px;
       text-align: center;
+      padding: 40px;
     }
     button {
       background-color: #238636;
-      color: white;
       border: none;
-      padding: 15px 30px;
-      font-size: 18px;
+      color: white;
+      padding: 15px 40px;
+      font-size: 20px;
       cursor: pointer;
+      border-radius: 6px;
       margin-top: 20px;
     }
-    p {
-      margin-top: 20px;
-      font-size: 16px;
+    button:hover {
+      background-color: #2ea043;
+    }
+    #status {
+      margin-top: 30px;
+      font-size: 18px;
     }
   </style>
 </head>
 <body>
-  <h1>BingBux Lite</h1>
-  <p>Tap the button and chill. This will auto-open Bing search tabs.</p>
-  <button onclick="startFarming()">Start AutoFarm</button>
-  <p id="status">Waiting to begin...</p>
+  <h1>BingBux Ultra</h1>
+  <p>Tap once. Earn max Microsoft Rewards while doing nothing.</p>
+  <button onclick="startAutoFarm()">Start AutoFarm</button>
+  <div id="status">Ready to farm.</div>
 
   <script>
-    const terms = [
-      "space facts", "cat memes", "Roblox news", "how to dance", "cool art",
-      "Minecraft armor", "funny videos", "programming memes", "AI ideas", "weird laws",
-      "cute animals", "super cars", "dream houses", "Blox Fruits", "ninja turtles",
-      "pizza facts", "daily horoscope", "modern tech", "top 10 lists", "funny tweets",
-      "alien theories", "how to get robux", "star wars facts", "marvel trivia"
+    const queries = [
+      "how to code", "funny cats", "roblox leaks", "nasa images", "weird facts",
+      "famous memes", "pizza near me", "celebrity birthdays", "today's weather",
+      "minecraft tips", "game cheats", "trending news", "ai memes", "cool wallpapers",
+      "superhero facts", "animal planet", "is water wet", "history trivia",
+      "raining tacos", "marvel vs dc", "earth from space", "deep sea creatures",
+      "satisfying videos", "daily joke", "why is the sky blue", "gaming setup ideas",
+      "best pc games", "dream houses", "anime power levels", "tech news"
     ];
 
-    function randomQuery() {
-      const q = terms[Math.floor(Math.random() * terms.length)];
-      return q + " " + Math.random().toString(36).substr(2, 5);
+    let searchCount = 0;
+    const totalSearches = 60;
+    const delay = 6500; // 6.5s between tabs (safe from rate limit)
+
+    function getRandomQuery() {
+      const term = queries[Math.floor(Math.random() * queries.length)];
+      return term + " " + Math.random().toString(36).substring(2, 6);
     }
 
-    function openSearch() {
-      const query = randomQuery();
-      const url = "https://www.bing.com/search?q=" + encodeURIComponent(query);
-      window.open(url, "_blank");
-    }
-
-    function startFarming() {
-      let count = 0;
-      const max = 50; // Total searches
-      const interval = 6000; // 6 seconds between tabs
-
-      document.getElementById("status").innerText = "Farming started...";
-
-      const loop = setInterval(() => {
-        if (count >= max) {
-          clearInterval(loop);
-          document.getElementById("status").innerText = "Done! You've earned max points.";
+    function startAutoFarm() {
+      document.getElementById("status").innerText = "AutoFarm started...";
+      const farming = setInterval(() => {
+        if (searchCount >= totalSearches) {
+          clearInterval(farming);
+          document.getElementById("status").innerText = "Done! 60 searches launched.";
           return;
         }
-        openSearch();
-        count++;
-        document.getElementById("status").innerText = `Search ${count}/${max}`;
-      }, interval);
+        const q = getRandomQuery();
+        const link = `https://www.bing.com/search?q=${encodeURIComponent(q)}`;
+        window.open(link, '_blank');
+        searchCount++;
+        document.getElementById("status").innerText = `Searching: ${searchCount}/60`;
+      }, delay);
     }
   </script>
 </body>
