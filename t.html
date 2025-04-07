@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>BingBux Lite</title>
+  <style>
+    body {
+      background-color: #0d1117;
+      color: #c9d1d9;
+      font-family: 'Courier New', monospace;
+      padding: 20px;
+      text-align: center;
+    }
+    button {
+      background-color: #238636;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 18px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    p {
+      margin-top: 20px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h1>BingBux Lite</h1>
+  <p>Tap the button and chill. This will auto-open Bing search tabs.</p>
+  <button onclick="startFarming()">Start AutoFarm</button>
+  <p id="status">Waiting to begin...</p>
+
+  <script>
+    const terms = [
+      "space facts", "cat memes", "Roblox news", "how to dance", "cool art",
+      "Minecraft armor", "funny videos", "programming memes", "AI ideas", "weird laws",
+      "cute animals", "super cars", "dream houses", "Blox Fruits", "ninja turtles",
+      "pizza facts", "daily horoscope", "modern tech", "top 10 lists", "funny tweets",
+      "alien theories", "how to get robux", "star wars facts", "marvel trivia"
+    ];
+
+    function randomQuery() {
+      const q = terms[Math.floor(Math.random() * terms.length)];
+      return q + " " + Math.random().toString(36).substr(2, 5);
+    }
+
+    function openSearch() {
+      const query = randomQuery();
+      const url = "https://www.bing.com/search?q=" + encodeURIComponent(query);
+      window.open(url, "_blank");
+    }
+
+    function startFarming() {
+      let count = 0;
+      const max = 50; // Total searches
+      const interval = 6000; // 6 seconds between tabs
+
+      document.getElementById("status").innerText = "Farming started...";
+
+      const loop = setInterval(() => {
+        if (count >= max) {
+          clearInterval(loop);
+          document.getElementById("status").innerText = "Done! You've earned max points.";
+          return;
+        }
+        openSearch();
+        count++;
+        document.getElementById("status").innerText = `Search ${count}/${max}`;
+      }, interval);
+    }
+  </script>
+</body>
+</html>
